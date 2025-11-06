@@ -741,7 +741,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\packages\Discord.Net.Webhook.2.2.0\lib\netstandard2.1\Discord.Net.Webhook.dll">
+    <EmbeddedResource Include="..\packages\Discord.Net.Webhook.2.2.0\lib\netstandard2.0\Discord.Net.Webhook.dll">
       <Link>ReferencesEx\Discord.Net.Webhook.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
