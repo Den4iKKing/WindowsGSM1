@@ -115,10 +115,14 @@ namespace WindowsGSM.GameServer
             const int maxAttempts = 3;
             Process lastProcess = null;
             Notice = null;
+            bool forcedValidation = false;
+            bool useValidate = validate;
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                var (process, error) = await Installer.SteamCMD.UpdateEx(_serverData.ServerID, AppId, validate, custom: custom);
+                Installer.SteamCMD.ResetErrorLog();
+
+                var (process, error) = await Installer.SteamCMD.UpdateEx(_serverData.ServerID, AppId, useValidate, custom: custom);
                 Error = error;
                 lastProcess = process;
 
@@ -128,6 +132,20 @@ namespace WindowsGSM.GameServer
                 }
 
                 await Task.Run(() => process.WaitForExit());
+
+                if (Installer.SteamCMD.HasAppStateError(AppId, "0x6"))
+                {
+                    if (!forcedValidation && !useValidate)
+                    {
+                        forcedValidation = true;
+                        useValidate = true;
+                        Notice = "SteamCMD reported Rust app state 0x6 after update. Retrying with validation.";
+                        continue;
+                    }
+
+                    Error = "SteamCMD reported Rust app state 0x6 after update. Please stop the server and retry the update with validation.";
+                    return process;
+                }
 
                 if (process.ExitCode != 0)
                 {

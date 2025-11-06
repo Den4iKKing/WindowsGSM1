@@ -452,6 +452,54 @@ namespace WindowsGSM.Installer
             return matches[0].Groups[1].Value;
         }
 
+        private static string GetSteamCmdStderrPath()
+        {
+            return Path.Combine(_installPath, "logs", "stderr.txt");
+        }
+
+        public static void ResetErrorLog()
+        {
+            try
+            {
+                string logPath = GetSteamCmdStderrPath();
+                if (File.Exists(logPath))
+                {
+                    File.Delete(logPath);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        public static bool HasAppStateError(string appId, string stateCode)
+        {
+            try
+            {
+                string logPath = GetSteamCmdStderrPath();
+                if (!File.Exists(logPath))
+                {
+                    return false;
+                }
+
+                string search = $"App '{appId}' state is {stateCode}";
+                foreach (var line in File.ReadLines(logPath).Reverse().Take(200))
+                {
+                    if (!string.IsNullOrWhiteSpace(line) && line.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return false;
+        }
+
         public void CreateUserDataTxtIfNotExist()
         {
             if (!File.Exists(_userDataPath))
