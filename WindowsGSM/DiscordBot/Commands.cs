@@ -123,7 +123,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_Start(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length == 2 && int.TryParse(args[1], out int i))
+            if (args.Length == 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
@@ -162,7 +162,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_Stop(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length == 2 && int.TryParse(args[1], out int i))
+            if (args.Length == 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
@@ -201,7 +201,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_Restart(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length == 2 && int.TryParse(args[1], out int i))
+            if (args.Length == 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
@@ -236,7 +236,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_SendCommand(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length >= 2 && int.TryParse(args[1], out int i))
+            if (args.Length >= 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
@@ -270,7 +270,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_Backup(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length >= 2 && int.TryParse(args[1], out int i))
+            if (args.Length >= 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
@@ -308,7 +308,7 @@ namespace WindowsGSM.DiscordBot
         private async Task Action_Update(SocketMessage message, string command)
         {
             string[] args = command.Split(' ');
-            if (args.Length >= 2 && int.TryParse(args[1], out int i))
+            if (args.Length >= 2 && int.TryParse(args[1], out _))
             {
                 await Application.Current.Dispatcher.Invoke(async () =>
                 {
