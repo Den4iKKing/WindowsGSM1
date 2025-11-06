@@ -112,9 +112,70 @@ namespace WindowsGSM.GameServer
 
         public async Task<Process> Update(bool validate = false, string custom = null)
         {
-            var (p, error) = await Installer.SteamCMD.UpdateEx(_serverData.ServerID, AppId, validate, custom: custom);
-            Error = error;
-            return p;
+            const int maxAttempts = 3;
+            Process lastProcess = null;
+            Notice = null;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                var (process, error) = await Installer.SteamCMD.UpdateEx(_serverData.ServerID, AppId, validate, custom: custom);
+                Error = error;
+                lastProcess = process;
+
+                if (!string.IsNullOrWhiteSpace(Error) || process == null)
+                {
+                    return process;
+                }
+
+                await Task.Run(() => process.WaitForExit());
+
+                if (process.ExitCode != 0)
+                {
+                    Error = $"SteamCMD exited with code {process.ExitCode}";
+                    if (attempt == maxAttempts)
+                    {
+                        return process;
+                    }
+
+                    continue;
+                }
+
+                string localBuild = GetLocalBuild();
+                string remoteBuild = await GetRemoteBuild();
+
+                if (string.IsNullOrWhiteSpace(localBuild) || string.IsNullOrWhiteSpace(remoteBuild))
+                {
+                    if (attempt == maxAttempts)
+                    {
+                        if (string.IsNullOrWhiteSpace(Error))
+                        {
+                            Error = "Unable to verify Rust server version after update.";
+                        }
+
+                        return process;
+                    }
+
+                    continue;
+                }
+
+                if (localBuild == remoteBuild)
+                {
+                    Error = null;
+                    Notice = null;
+                    return process;
+                }
+
+                if (attempt < maxAttempts)
+                {
+                    Notice = $"Rust update retry: local build {localBuild} does not match remote build {remoteBuild}. Retrying...";
+                    continue;
+                }
+
+                Error = $"Local build {localBuild} does not match remote build {remoteBuild} after {maxAttempts} attempts.";
+                return process;
+            }
+
+            return lastProcess;
         }
 
         public bool IsInstallValid()
