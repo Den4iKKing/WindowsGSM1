@@ -48,7 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <NoWarn>1998;</NoWarn>
+    <NoWarn>1998;CS8632</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -63,7 +63,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <NoWarn>1998;</NoWarn>
+    <NoWarn>1998;CS8632</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Images\WindowsGSM.ico</ApplicationIcon>
