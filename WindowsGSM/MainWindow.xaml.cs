@@ -2434,8 +2434,6 @@ namespace WindowsGSM
 
             dynamic gameServer = GameServer.Data.Class.Get(server.Game, new ServerConfig(server.ID), PluginsList);
 
-            string localVersion = gameServer.GetLocalBuild();
-
             while (p != null && !p.HasExited)
             {
                 await Task.Delay(60000 * UPDATE_INTERVAL_MINUTE);
@@ -2447,17 +2445,20 @@ namespace WindowsGSM
 
                 if (p == null || p.HasExited) { break; }
 
-                //Try to get local build again if not found just now
+                //Get the latest local build before comparing to ensure it reflects any recent updates
+                string localVersion = gameServer.GetLocalBuild();
+
                 if (string.IsNullOrWhiteSpace(localVersion))
                 {
-                    localVersion = gameServer.GetLocalBuild();
+                    Log(server.ID, $"[NOTICE] Fail to get local build.");
+                    continue;
                 }
 
                 //Get remote build
                 string remoteVersion = await gameServer.GetRemoteBuild();
 
                 //Continue if success to get localVersion and remoteVersion
-                if (!string.IsNullOrWhiteSpace(localVersion) && !string.IsNullOrWhiteSpace(remoteVersion))
+                if (!string.IsNullOrWhiteSpace(remoteVersion))
                 {
                     if (GetServerMetadata(server.ID).ServerStatus != ServerStatus.Started)
                     {
@@ -2492,6 +2493,9 @@ namespace WindowsGSM
                         {
                             Log(server.ID, $"Server: Updated ({remoteVersion})");
 
+                            //Ensure the in-memory version reflects the update result in case the loop continues
+                            localVersion = remoteVersion;
+
                             if (GetServerMetadata(serverId).DiscordAlert && GetServerMetadata(serverId).AutoUpdateAlert)
                             {
                                 var webhook = new DiscordWebhook(GetServerMetadata(serverId).DiscordWebhook, GetServerMetadata(serverId).DiscordMessage, g_DonorType);
@@ -2516,10 +2520,6 @@ namespace WindowsGSM
 
                         break;
                     }
-                }
-                else if (string.IsNullOrWhiteSpace(localVersion))
-                {
-                    Log(server.ID, $"[NOTICE] Fail to get local build.");
                 }
                 else if (string.IsNullOrWhiteSpace(remoteVersion))
                 {
