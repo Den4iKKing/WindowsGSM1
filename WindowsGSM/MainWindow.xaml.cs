@@ -2113,19 +2113,38 @@ namespace WindowsGSM
 
             var (p, remoteVersion, gameServer) = await Server_BeginUpdate(server, silenceCheck: validate, forceUpdate: true, validate: validate);
 
-            if (p == null && string.IsNullOrEmpty(gameServer.Error)) // Update success (non-steamcmd server)
+            bool updateSucceeded = false;
+            string updateError = gameServer.Error;
+
+            if (p == null)
             {
-                Log(server.ID, $"Server: Updated {(validate ? "Validate " : string.Empty)}({remoteVersion})");
+                updateSucceeded = string.IsNullOrWhiteSpace(updateError);
             }
-            else if (p != null) // p stores process of steamcmd
+            else
             {
                 await Task.Run(() => { p.WaitForExit(); });
+
+                if (p.ExitCode == 0)
+                {
+                    updateSucceeded = string.IsNullOrWhiteSpace(updateError);
+                }
+                else
+                {
+                    updateError = $"SteamCMD exited with code {p.ExitCode}";
+                }
+            }
+
+            if (updateSucceeded)
+            {
                 Log(server.ID, $"Server: Updated {(validate ? "Validate " : string.Empty)}({remoteVersion})");
             }
             else
             {
                 Log(server.ID, "Server: Fail to update");
-                Log(server.ID, "[ERROR] " + gameServer.Error);
+                if (!string.IsNullOrWhiteSpace(updateError))
+                {
+                    Log(server.ID, "[ERROR] " + updateError);
+                }
             }
 
             _serverMetadata[int.Parse(server.ID)].ServerStatus = ServerStatus.Stopped;
